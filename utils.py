@@ -4,6 +4,10 @@ TIPOS_INGRESO = [
     #'Documento soporte con no obligados'
 ]
 
+TIPOS_NOTA_CREDITO = [
+    'Nota crédito electrónica',
+]
+
 def calcular_digito_verificacion(nit):
     """Calcula el dígito de verificación según algoritmo DIAN."""
     nit = str(nit)
