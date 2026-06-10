@@ -1,11 +1,5 @@
 import pandas as pd
-from utils import calcular_digito_verificacion
-
-# Documentos tributarios que generan ingreso para el emisor
-TIPOS_INGRESO = [
-    'Factura electrónica',
-    'Documento soporte con no obligados'
-]
+from utils import calcular_digito_verificacion, TIPOS_INGRESO
 
 def calcular_ingresos(df, nit_filtro):
     """Consolida los ingresos emitidos por la empresa agrupados por receptor."""

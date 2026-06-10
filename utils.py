@@ -1,14 +1,22 @@
+# Documentos tributarios que generan ingreso para el emisor
+TIPOS_INGRESO = [
+    'Factura electrónica',
+    #'Documento soporte con no obligados'
+]
+
 def calcular_digito_verificacion(nit):
-    nit = str(nit)  # asegurarse que sea texto
-    primos = [3, 7, 13, 17, 19, 23, 29, 37, 41, 43, 47, 53, 59, 67, 71]
+    """Calcula el dígito de verificación según algoritmo DIAN."""
+    nit = str(nit)
     
-    # Multiplicar cada dígito por su primo correspondiente de derecha a izquierda
+    # Pesos ponderados definidos por la DIAN
+    pesos = [3, 7, 13, 17, 19, 23, 29, 37, 41, 43, 47, 53, 59, 67, 71]
+
     suma = 0
     for i, digito in enumerate(reversed(nit)):
-        suma += int(digito) * primos[i]
-    
+        suma += int(digito) * pesos[i]
+
     residuo = suma % 11
-    
+
     if residuo == 0:
         return 0
     elif residuo == 1:

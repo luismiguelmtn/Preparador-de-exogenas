@@ -1,4 +1,5 @@
 import pandas as pd
+from utils import  TIPOS_INGRESO
 from calculo_ingresos import calcular_ingresos
 
 # Cargar archivo
@@ -8,8 +9,14 @@ df = pd.read_excel(archivo, sheet_name=archivo.sheet_names[0])
 # NIT de la empresa que reporta
 nit_filtro = int(input("Ingresa tu NIT (sin dígito de verificación): "))
 
-# Calcular consolidados
+# Calcular consolidados de ingresos
 ingresos = calcular_ingresos(df, nit_filtro)
+
+# Reducir df901391837 eliminando filas ya procesadas en ingresos
+df = df[~(
+    (df['NIT Emisor'] == nit_filtro) &
+    (df['Tipo de documento'].isin(TIPOS_INGRESO))
+)]
 
 # Guardar resultados
 with pd.ExcelWriter('consolidado_exogena.xlsx', engine='openpyxl') as writer:
