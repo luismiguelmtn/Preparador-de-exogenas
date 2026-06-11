@@ -17,8 +17,8 @@ def calcular_gastos_excluidos(df, nit_filtro):
         Total=('Total', 'sum'),
     ).reset_index()
 
-    # Base gravable: IVA generado / tarifa del 19% (Art. 468 E.T.)
-    consolidado['Base'] = consolidado['IVA'] / 0.19
+    # Base gravable: Para gastos excluidos se asigna 0
+    consolidado['Base'] = 0
 
     # Dígito de verificación calculado según algoritmo DIAN
     consolidado['DV'] = consolidado['NIT Emisor'].apply(calcular_digito_verificacion)

@@ -2,7 +2,7 @@ import pandas as pd
 from utils import calcular_digito_verificacion, TIPOS_DEVOLUCION
 
 def calcular_devolucion(df, nit_filtro):
-    """Consolida las devoluciones emitidas por la empresa agrupados por emisor."""
+    """Consolida las devoluciones emitidas a la empresa agrupados por emisor."""
 
     devoluciones = df[
         (df['NIT Emisor'] != nit_filtro) &

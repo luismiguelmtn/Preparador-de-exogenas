@@ -1,25 +1,33 @@
 # Documentos tributarios que generan ingreso para el emisor
 TIPOS_INGRESO = [
     'Factura electrónica',
+    'Documento equivalente POS',
+    'Factura electrónica de contingencia',
 ]
 
 # Documentos tributarios que generan nota crédito para el emisor
 TIPOS_NOTA_CREDITO = [
-    'Nota crédito electrónica',
+    'Nota de crédito electrónica',
 ]
 # Documentos tributarios que generan devolución para el emisor
 TIPOS_DEVOLUCION = [
-    'Nota crédito electrónica',
+    'Nota de crédito electrónica',
 ]
 
 # Documentos tributarios que generan gasto para el emisor
 TIPOS_GASTO = [
     'Factura electrónica',
+    'Documento equivalente POS',
+    'Documento equivalente - Transporte aéreo de pasajeros',
+    'Factura electrónica de contingencia',
 ]
 
 # Documentos tributarios que generan gasto para el emisor (excluidos)
 TIPOS_GASTO_EXCLUIDO = [
     'Factura electrónica',
+    'Documento equivalente POS',
+    'Documento equivalente - Transporte aéreo de pasajeros',
+    'Factura electrónica de contingencia',
 ]
 
 def calcular_digito_verificacion(nit):
