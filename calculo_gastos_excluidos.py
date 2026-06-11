@@ -1,14 +1,23 @@
 import pandas as pd
-from utils import calcular_digito_verificacion, TIPOS_GASTO_EXCLUIDO
+from utils import calcular_digito_verificacion, TIPOS_GASTO_EXCLUIDO,TIPOS_DOC_SOPORTE
 
 def calcular_gastos_excluidos(df, nit_filtro):
-    """Consolida los gastos incurridos por la empresa agrupados por emisor."""
+    """Consolida los gastos excluidos por la empresa agrupados por emisor."""
 
-    facturas_emitidas = df[
+    # Caso 1: facturas de terceros sin IVA (tú eres receptor)
+    caso1 = (
         (df['NIT Emisor'] != nit_filtro) &
         (df['Tipo de documento'].isin(TIPOS_GASTO_EXCLUIDO)) &
         (df['IVA'] == 0)
-    ]
+    )
+
+    # Caso 2: Documento soporte emitido por la empresa (gasto propio)
+    caso2 = (
+        (df['NIT Emisor'] == nit_filtro) &
+        (df['Tipo de documento'].isin(TIPOS_DOC_SOPORTE))
+    )
+
+    facturas_emitidas = df[caso1 | caso2]
 
     consolidado = facturas_emitidas.groupby(
         ['NIT Emisor', 'Nombre Emisor']

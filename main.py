@@ -1,10 +1,11 @@
 import pandas as pd
-from utils import  TIPOS_DEVOLUCION, TIPOS_GASTO, TIPOS_INGRESO, TIPOS_NOTA_CREDITO, TIPOS_GASTO_EXCLUIDO
+from utils import  TIPOS_DEVOLUCION, TIPOS_DOC_SOPORTE, TIPOS_GASTO, TIPOS_INGRESO, TIPOS_NOMINA, TIPOS_NOTA_CREDITO, TIPOS_GASTO_EXCLUIDO
 from calculo_ingresos import calcular_ingresos
 from calculo_notas_credito import calcular_NC
 from calculo_devoluciones import calcular_devolucion
 from calculo_gastos import calcular_gastos
 from calculo_gastos_excluidos import calcular_gastos_excluidos
+from calculo_nomina import calcular_nominas
 
 # Cargar archivo
 archivo = pd.ExcelFile("ejemplo.xlsx")
@@ -55,9 +56,23 @@ gastos_excluidos = calcular_gastos_excluidos(df, nit_filtro)
 
 # Reducir df eliminando filas ya procesadas en gastos excluidos
 df = df[~(
+    (
+        (df['NIT Emisor'] != nit_filtro) &
+        (df['Tipo de documento'].isin(TIPOS_GASTO_EXCLUIDO)) &
+        (df['IVA'] == 0)
+    ) | (
+        (df['NIT Emisor'] == nit_filtro) &
+        (df['Tipo de documento'].isin(TIPOS_DOC_SOPORTE))
+    )
+)]
+
+# Calcular consolidados de nomina
+nominas = calcular_nominas(df, nit_filtro)
+
+# Reducir df eliminando filas ya procesadas en nominas
+df = df[~(
     (df['NIT Emisor'] != nit_filtro) &
-    (df['Tipo de documento'].isin(TIPOS_GASTO_EXCLUIDO)) &
-    (df['IVA'] == 0)
+    (df['Tipo de documento'].isin(TIPOS_NOMINA))
 )]
 
 # Guardar resultados
@@ -67,5 +82,6 @@ with pd.ExcelWriter('consolidado_exogena.xlsx', engine='openpyxl') as writer:
     devoluciones.to_excel(writer, sheet_name='Devoluciones', index=False)
     gastos.to_excel(writer, sheet_name='Gastos', index=False)
     gastos_excluidos.to_excel(writer, sheet_name='Gastos Excluidos', index=False)
-    
+    nominas.to_excel(writer, sheet_name='Nominas', index=False)
+
 print("Archivo consolidado_exogena.xlsx generado exitosamente.")

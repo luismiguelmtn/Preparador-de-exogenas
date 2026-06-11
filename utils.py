@@ -37,6 +37,11 @@ TIPOS_NOMINA = [
     'Nomina Individual De Ajustes',
 ]
 
+# Documento soporte emitido por la empresa (gasto excluido propio)
+TIPOS_DOC_SOPORTE = [
+    'Documento soporte con no obligados',
+]
+
 def calcular_digito_verificacion(nit):
     """Calcula el dígito de verificación según algoritmo DIAN."""
     nit = str(nit)
