@@ -11,8 +11,12 @@ from calculo_nomina import calcular_nominas
 archivo = pd.ExcelFile("ejemplo.xlsx")
 df = pd.read_excel(archivo, sheet_name=archivo.sheet_names[0])
 
+# Normalizar columnas de NIT a texto para manejo uniforme
+df['NIT Emisor'] = df['NIT Emisor'].astype(str).str.strip()
+df['NIT Receptor'] = df['NIT Receptor'].astype(str).str.strip()
+
 # NIT de la empresa que reporta
-nit_filtro = int(input("Ingresa tu NIT (sin dígito de verificación): "))
+nit_filtro = input("Ingresa tu NIT (sin dígito de verificación): ").strip()
 
 # Calcular consolidados de ingresos
 ingresos = calcular_ingresos(df, nit_filtro)

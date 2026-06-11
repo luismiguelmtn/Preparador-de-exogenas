@@ -46,6 +46,10 @@ def calcular_digito_verificacion(nit):
     """Calcula el dígito de verificación según algoritmo DIAN."""
     nit = str(nit)
     
+    # NITs extranjeros contienen letras, el DV no aplica
+    if not nit.isdigit():
+        return ''
+
     # Pesos ponderados definidos por la DIAN
     pesos = [3, 7, 13, 17, 19, 23, 29, 37, 41, 43, 47, 53, 59, 67, 71]
 
