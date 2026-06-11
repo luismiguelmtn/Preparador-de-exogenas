@@ -29,6 +29,13 @@ TIPOS_GASTO_EXCLUIDO = [
     'Documento equivalente - Transporte aéreo de pasajeros',
     'Factura electrónica de contingencia',
 ]
+    
+# Documentos tributarios que generan nómina para el emisor
+TIPOS_NOMINA = [
+    'Nomina Individual',
+    'Nomima Individual De Ajustes',
+    'Nomina Individual De Ajustes',
+]
 
 def calcular_digito_verificacion(nit):
     """Calcula el dígito de verificación según algoritmo DIAN."""
