@@ -1,10 +1,14 @@
 # Documentos tributarios que generan ingreso para el emisor
 TIPOS_INGRESO = [
     'Factura electrónica',
-    #'Documento soporte con no obligados'
 ]
 
+# Documentos tributarios que generan nota crédito para el emisor
 TIPOS_NOTA_CREDITO = [
+    'Nota crédito electrónica',
+]
+# Documentos tributarios que generan devolución para el emisor
+TIPOS_DEVOLUCION = [
     'Nota crédito electrónica',
 ]
 
