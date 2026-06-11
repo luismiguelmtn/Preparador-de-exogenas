@@ -12,6 +12,16 @@ TIPOS_DEVOLUCION = [
     'Nota crédito electrónica',
 ]
 
+# Documentos tributarios que generan gasto para el emisor
+TIPOS_GASTO = [
+    'Factura electrónica',
+]
+
+# Documentos tributarios que generan gasto para el emisor (excluidos)
+TIPOS_GASTO_EXCLUIDO = [
+    'Factura electrónica',
+]
+
 def calcular_digito_verificacion(nit):
     """Calcula el dígito de verificación según algoritmo DIAN."""
     nit = str(nit)
