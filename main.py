@@ -75,7 +75,7 @@ nominas = calcular_nominas(df, nit_filtro)
 
 # Reducir df eliminando filas ya procesadas en nominas
 df = df[~(
-    (df['NIT Emisor'] != nit_filtro) &
+    (df['NIT Emisor'] == nit_filtro) &
     (df['Tipo de documento'].isin(TIPOS_NOMINA))
 )]
 
