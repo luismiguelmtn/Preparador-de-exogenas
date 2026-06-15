@@ -1,10 +1,25 @@
 # Ignorar archivos de Excel
 *.xlsx
+*.xls
+*.xlsm
+*.csv
 
 # Cache de Python
 __pycache__/
 *.pyc
 *.pyo
+*.pyd
 
 # Entorno virtual
 .venv/
+venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
