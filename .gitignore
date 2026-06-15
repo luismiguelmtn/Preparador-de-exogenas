@@ -1,5 +1,5 @@
 # Ignorar archivos de Excel
-ejemplo - copia.xlsx
+*.xlsx
 
 # Cache de Python
 __pycache__/
