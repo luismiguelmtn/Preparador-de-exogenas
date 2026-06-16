@@ -1,6 +1,7 @@
 import pandas as pd
 import io
-from utils import  TIPOS_DEVOLUCION, TIPOS_DOC_SOPORTE, TIPOS_GASTO, TIPOS_INGRESO, TIPOS_NOMINA, TIPOS_NOTA_CREDITO, TIPOS_GASTO_EXCLUIDO
+from utils import  TIPOS_DEVOLUCION, TIPOS_DOC_SOPORTE, TIPOS_GASTO, TIPOS_INGRESO, TIPOS_NOMINA, TIPOS_NOTA_CREDITO, TIPOS_GASTO_EXCLUIDO, COLUMNAS_REQUERIDAS
+from utils import validar_nit
 from calculo_ingresos import calcular_ingresos
 from calculo_notas_credito import calcular_NC
 from calculo_devoluciones import calcular_devolucion
@@ -9,14 +10,24 @@ from calculo_gastos_excluidos import calcular_gastos_excluidos
 from calculo_nomina import calcular_nominas
 
 
-def generar_consolidado(ruta_archivo, nit_filtro):
-    # Cargar archivo y acepta ruta en disco o contenido en memoria (bytes desde la API)
-    if isinstance(ruta_archivo, bytes):
-        archivo = pd.ExcelFile(io.BytesIO(ruta_archivo))
-    else:
-        archivo = pd.ExcelFile(ruta_archivo)
+def generar_consolidado(info_exogena, nit_filtro):
 
+    # Validar formato del NIT
+    if not validar_nit(nit_filtro):
+        raise ValueError(f"NIT inválido: '{nit_filtro}'. Debe ser numérico, 8-10 dígitos, sin dígito de verificación")
+
+    try:
+        # Cargar archivo y contenido en memoria (bytes desde la API)
+        archivo = pd.ExcelFile(io.BytesIO(info_exogena))
+    except Exception as e:
+        raise ValueError(f"Archivo no es un Excel válido: {str(e)}")
+    
     df = pd.read_excel(archivo, sheet_name=archivo.sheet_names[0])
+
+    # Validar que el DataFrame tenga las columnas requeridas
+    columnas_faltantes = [col for col in COLUMNAS_REQUERIDAS if col not in df.columns]
+    if columnas_faltantes:
+        raise ValueError(f"Columnas faltantes en el archivo: {', '.join(columnas_faltantes)}")
 
     # Normalizar columnas de NIT a texto para manejo uniforme
     df['NIT Emisor'] = df['NIT Emisor'].astype(str).str.strip()
@@ -95,10 +106,3 @@ def generar_consolidado(ruta_archivo, nit_filtro):
 
     buffer.seek(0)
     return buffer
-
-if __name__ == "__main__":
-    nit = input("Ingresa tu NIT (sin dígito de verificación): ").strip()
-    resultado = generar_consolidado("ejemplo.xlsx", nit)
-    with open("consolidado_exogena.xlsx", "wb") as f:
-        f.write(resultado.read())
-    print("Archivo consolidado_exogena.xlsx generado exitosamente.")

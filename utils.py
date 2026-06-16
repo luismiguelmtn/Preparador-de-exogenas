@@ -1,3 +1,5 @@
+import re
+
 # Documentos tributarios que generan ingreso para el emisor
 TIPOS_INGRESO = [
     'Factura electrónica',
@@ -42,6 +44,16 @@ TIPOS_DOC_SOPORTE = [
     'Documento soporte con no obligados',
 ]
 
+COLUMNAS_REQUERIDAS = [
+    'Tipo de documento',
+    'NIT Emisor',
+    'Nombre Emisor',
+    'NIT Receptor',
+    'Nombre Receptor',
+    'IVA',
+    'Total',
+]
+
 def calcular_digito_verificacion(nit):
     """Calcula el dígito de verificación según algoritmo DIAN."""
     nit = str(nit)
@@ -64,4 +76,12 @@ def calcular_digito_verificacion(nit):
     elif residuo == 1:
         return 1
     else:
-        return 11 - residuo
+        return 11 - residuo 
+
+
+def validar_nit(nit: str) -> bool:
+    """Valida que el NIT tenga formato correcto (solo dígitos, sin dígito verificación)."""
+    # Debe ser numérico, entre 8-10 dígitos
+    if not re.match(r'^\d{8,10}$', nit):
+        return False
+    return True
