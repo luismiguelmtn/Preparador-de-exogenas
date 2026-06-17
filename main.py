@@ -66,7 +66,7 @@ def generar_consolidado(info_exogena, nit_filtro):
 
     # Reducir df eliminando filas ya procesadas en devoluciones
     df = df[~(
-        (df['NIT Emisor'] != nit_filtro) &
+        (df['NIT Receptor'] == nit_filtro) &
         (df['Tipo de documento'].isin(TIPOS_DEVOLUCION))
     )]
 
@@ -75,7 +75,7 @@ def generar_consolidado(info_exogena, nit_filtro):
 
     # Reducir df eliminando filas ya procesadas en gastos
     df = df[~(
-        (df['NIT Emisor'] != nit_filtro) &
+        (df['NIT Receptor'] == nit_filtro) &
         (df['Tipo de documento'].isin(TIPOS_GASTO)) &
         (df['IVA'] != 0)
     )]
@@ -86,7 +86,7 @@ def generar_consolidado(info_exogena, nit_filtro):
     # Reducir df eliminando filas ya procesadas en gastos excluidos
     df = df[~(
         (
-            (df['NIT Emisor'] != nit_filtro) &
+            (df['NIT Receptor'] == nit_filtro) &
             (df['Tipo de documento'].isin(TIPOS_GASTO_EXCLUIDO)) &
             (df['IVA'] == 0)
         ) | (
