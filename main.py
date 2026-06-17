@@ -12,6 +12,9 @@ from calculo_nomina import calcular_nominas
 
 def generar_consolidado(info_exogena, nit_filtro):
 
+    # Limpiar espacios en el NIT
+    nit_filtro = nit_filtro.strip()
+
     # Validar formato del NIT
     if not validar_nit(nit_filtro):
         raise ValueError(f"NIT inválido: '{nit_filtro}'. Debe ser numérico, 8-10 dígitos, sin dígito de verificación")
@@ -19,15 +22,22 @@ def generar_consolidado(info_exogena, nit_filtro):
     try:
         # Cargar archivo y contenido en memoria (bytes desde la API)
         archivo = pd.ExcelFile(io.BytesIO(info_exogena))
+        df = pd.read_excel(archivo, sheet_name=archivo.sheet_names[0])
     except Exception as e:
         raise ValueError(f"Archivo no es un Excel válido: {str(e)}")
     
-    df = pd.read_excel(archivo, sheet_name=archivo.sheet_names[0])
 
     # Validar que el DataFrame tenga las columnas requeridas
     columnas_faltantes = [col for col in COLUMNAS_REQUERIDAS if col not in df.columns]
     if columnas_faltantes:
         raise ValueError(f"Columnas faltantes en el archivo: {', '.join(columnas_faltantes)}")
+    
+    # Validar que las columnas de IVA y Total sean numéricas
+    for columna in ['IVA', 'Total']:
+        df[columna] = pd.to_numeric(df[columna], errors='coerce')
+
+        if df[columna].isna().any():
+            raise ValueError(f"Columna '{columna}' contiene valores no numéricos o vacíos.")
 
     # Normalizar columnas de NIT a texto para manejo uniforme
     df['NIT Emisor'] = df['NIT Emisor'].astype(str).str.strip()
