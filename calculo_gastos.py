@@ -5,7 +5,7 @@ def calcular_gastos(df, nit_filtro):
     """Consolida los gastos incurridos por la empresa agrupados por emisor."""
 
     facturas_emitidas = df[
-        (df['NIT Emisor'] != nit_filtro) &
+        (df['NIT Receptor'] == nit_filtro) &
         (df['Tipo de documento'].isin(TIPOS_GASTO)) &
         (df['IVA'] != 0)
     ]

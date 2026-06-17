@@ -6,7 +6,7 @@ def calcular_gastos_excluidos(df, nit_filtro):
 
     # Caso 1: facturas de terceros sin IVA (tú eres receptor)
     caso1 = (
-        (df['NIT Emisor'] != nit_filtro) &
+        (df['NIT Receptor'] == nit_filtro) &
         (df['Tipo de documento'].isin(TIPOS_GASTO_EXCLUIDO)) &
         (df['IVA'] == 0)
     )

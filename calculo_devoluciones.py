@@ -5,7 +5,7 @@ def calcular_devolucion(df, nit_filtro):
     """Consolida las devoluciones emitidas a la empresa agrupados por emisor."""
 
     devoluciones = df[
-        (df['NIT Emisor'] != nit_filtro) &
+        (df['NIT Receptor'] == nit_filtro) &
         (df['Tipo de documento'].isin(TIPOS_DEVOLUCION))
     ]
 

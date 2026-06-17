@@ -1,115 +1,300 @@
-# Preparador de Exógenas DIAN
+# Preparador de Exogenas DIAN
 
-Herramienta en Python para consolidar la información exógena reportada a la DIAN. A partir de un archivo Excel exportado de la plataforma de facturación electrónica, genera un consolidado por tercero para cada tipo de operación tributaria.
+Aplicacion en Python y FastAPI para consolidar informacion exogena de la DIAN a partir de un archivo Excel exportado desde una plataforma de facturacion electronica.
+
+La app recibe un archivo Excel y el NIT de la empresa reportante por medio de un endpoint web. Luego genera un archivo `consolidado_exogena.xlsx` en memoria y lo devuelve como descarga.
+
+---
+
+## Estado Actual
+
+El proyecto esta orientado a uso web mediante FastAPI. Ya no depende de ejecutar `main.py` por consola ni de leer archivos desde una ruta fija del disco.
+
+Flujo actual:
+
+1. El usuario envia un archivo Excel y el NIT de la empresa.
+2. `api.py` recibe el archivo por el endpoint `/consolidar`.
+3. El archivo se lee en memoria como bytes.
+4. `main.py` valida y procesa la informacion.
+5. Se genera un Excel consolidado en memoria.
+6. La API devuelve el archivo como descarga.
 
 ---
 
 ## Requisitos
 
 - Python 3.10 o superior
-- Librerías listadas en `requirements.txt`
+- Dependencias listadas en `requirements.txt`
 
-Instalar dependencias:
+Instalacion:
 
 ```bash
 pip install -r requirements.txt
 ```
 
+Dependencias principales:
+
+- `fastapi`
+- `uvicorn`
+- `python-multipart`
+- `pandas`
+- `openpyxl`
+
 ---
 
-## Cómo ejecutar
+## Como Ejecutar La API
+
+Iniciar el servidor de desarrollo:
 
 ```bash
-python main.py
+uvicorn api:app --reload
 ```
 
-El programa solicitará:
+Luego abrir la documentacion interactiva de FastAPI:
 
-1. El archivo Excel con la información exógena (debe estar en la misma carpeta)
-2. El NIT de la empresa reportante (sin dígito de verificación)
+```text
+http://127.0.0.1:8000/docs
+```
 
-Al finalizar genera el archivo `consolidado_exogena.xlsx` en la misma carpeta.
+Desde ahi se puede probar el endpoint:
+
+```text
+POST /consolidar
+```
+
+Parametros esperados:
+
+| Campo | Tipo | Descripcion |
+|---|---|---|
+| `archivo` | Archivo Excel | Archivo `.xlsx` con la informacion exogena |
+| `nit` | Texto | NIT de la empresa reportante, sin digito de verificacion |
+
+La respuesta es un archivo Excel descargable llamado:
+
+```text
+consolidado_exogena.xlsx
+```
 
 ---
 
-## Estructura del proyecto
+## Estructura Del Proyecto
 
-```
+```text
 Preparador de exogenas/
-    main.py                      ← Punto de entrada, coordina todos los módulos
-    calculo_ingresos.py          ← Consolidado de ingresos facturados
-    calculo_notas_credito.py     ← Consolidado de notas crédito emitidas
-    calculo_devoluciones.py      ← Consolidado de devoluciones recibidas
-    calculo_gastos.py            ← Consolidado de gastos con IVA
-    calculo_gastos_excluidos.py  ← Consolidado de gastos sin IVA
-    calculo_nomina.py            ← Consolidado de nómina electrónica
-    utils.py                     ← Constantes y funciones compartidas
-    requirements.txt             ← Dependencias del proyecto
+    api.py                       <- Entrada web con FastAPI
+    main.py                      <- Coordina validacion, lectura y generacion del consolidado
+    calculo_ingresos.py          <- Consolidado de ingresos facturados
+    calculo_notas_credito.py     <- Consolidado de notas credito emitidas
+    calculo_devoluciones.py      <- Consolidado de devoluciones recibidas
+    calculo_gastos.py            <- Consolidado de gastos con IVA
+    calculo_gastos_excluidos.py  <- Consolidado de gastos sin IVA
+    calculo_nomina.py            <- Consolidado de nomina electronica
+    utils.py                     <- Constantes, columnas requeridas y funciones compartidas
+    requirements.txt             <- Dependencias del proyecto
     .gitignore
 ```
 
 ---
 
-## Resultado
+## Validaciones Implementadas
 
-El archivo `consolidado_exogena.xlsx` contiene una hoja por cada tipo de operación:
+Antes de generar el consolidado, la aplicacion realiza estas validaciones:
+
+- El NIT se limpia con `.strip()`.
+- El NIT debe ser numerico.
+- El NIT debe tener entre 8 y 10 digitos.
+- El archivo recibido debe poder abrirse como Excel.
+- Se lee siempre la primera hoja del archivo.
+- El archivo debe contener las columnas requeridas:
+  - `Tipo de documento`
+  - `NIT Emisor`
+  - `Nombre Emisor`
+  - `NIT Receptor`
+  - `Nombre Receptor`
+  - `IVA`
+  - `Total`
+- Las columnas `IVA` y `Total` deben contener valores numericos.
+- Las columnas `NIT Emisor` y `NIT Receptor` se normalizan como texto.
+
+En la API:
+
+- Los errores de validacion se responden como HTTP `400`.
+- Los errores inesperados se responden como HTTP `500`.
+
+---
+
+## Resultado Generado
+
+El Excel generado contiene una hoja por cada tipo de operacion:
 
 | Hoja | Contenido |
 |---|---|
-| Ingresos | Facturas emitidas por la empresa, agrupadas por receptor |
-| Notas Crédito | Notas crédito emitidas por la empresa, agrupadas por receptor |
-| Devoluciones | Notas crédito recibidas por la empresa, agrupadas por emisor |
-| Gastos | Facturas recibidas con IVA, agrupadas por emisor |
-| Gastos Excluidos | Facturas recibidas sin IVA, agrupadas por emisor |
-| Nóminas | Nómina electrónica emitida, agrupada por receptor |
+| `Ingresos` | Facturas emitidas por la empresa, agrupadas por receptor |
+| `Notas Credito` | Notas credito emitidas por la empresa, agrupadas por receptor |
+| `Devoluciones` | Notas credito recibidas por la empresa, agrupadas por emisor |
+| `Gastos` | Facturas recibidas con IVA, agrupadas por emisor |
+| `Gastos Excluidos` | Facturas recibidas sin IVA, agrupadas por emisor |
+| `Nominas` | Nomina electronica emitida, agrupada por receptor |
 
-Cada hoja incluye las columnas: `NIT`, `DV`, `Nombre`, `Base`, `IVA`, `Total`.
+Columnas actuales de salida:
+
+- En hojas agrupadas por receptor:
+  - `NIT Receptor`
+  - `DV`
+  - `Nombre Receptor`
+  - `Base`
+  - `IVA`
+  - `Total`
+
+- En hojas agrupadas por emisor:
+  - `NIT Emisor`
+  - `DV`
+  - `Nombre Emisor`
+  - `Base`
+  - `IVA`
+  - `Total`
 
 ---
 
-## Lógica de negocio
+## Logica De Negocio
 
-La información exógena contiene documentos donde la empresa puede aparecer como emisora o como receptora. Cada módulo aplica filtros distintos según la naturaleza de la operación.
+La informacion exogena contiene documentos donde la empresa puede aparecer como emisora o como receptora. Cada modulo aplica filtros segun el rol de la empresa y el tipo de documento.
 
 ### Ingresos
-Documentos donde **la empresa es emisora** — son las facturas que ella generó a sus clientes. Se consolidan agrupando por `NIT Receptor` para totalizar lo facturado a cada cliente.
 
-Tipos de documento: Factura electrónica, Documento equivalente POS, Factura electrónica de contingencia.
+Documentos donde la empresa es emisora. Corresponden a facturas generadas a clientes.
 
-### Notas Crédito
-Documentos donde **la empresa es emisora** de una nota crédito — son ajustes o correcciones que ella realizó sobre facturas propias. Se consolidan por `NIT Receptor`.
+Filtro principal:
 
-Tipo de documento: Nota de crédito electrónica.
+- `NIT Emisor == nit`
+- Tipo de documento incluido en `TIPOS_INGRESO`
+
+Se agrupa por:
+
+- `NIT Receptor`
+- `Nombre Receptor`
+
+### Notas Credito
+
+Documentos donde la empresa es emisora de una nota credito.
+
+Filtro principal:
+
+- `NIT Emisor == nit`
+- Tipo de documento incluido en `TIPOS_NOTA_CREDITO`
+
+Se agrupa por:
+
+- `NIT Receptor`
+- `Nombre Receptor`
 
 ### Devoluciones
-Documentos donde **la empresa es receptora** de una nota crédito — son devoluciones que terceros le realizaron a ella. Se consolidan por `NIT Emisor` para identificar quién hizo la devolución.
 
-Tipo de documento: Nota de crédito electrónica.
+Documentos donde la empresa es receptora de una nota credito emitida por un tercero.
 
-> La diferencia entre Notas Crédito y Devoluciones es el rol de la empresa: en las primeras es quien emite, en las segundas es quien recibe.
+Filtro principal:
+
+- `NIT Receptor == nit`
+- Tipo de documento incluido en `TIPOS_DEVOLUCION`
+
+Se agrupa por:
+
+- `NIT Emisor`
+- `Nombre Emisor`
 
 ### Gastos
-Documentos donde **la empresa es receptora** y el documento tiene IVA — son compras o servicios adquiridos que generan IVA descontable. Se consolidan por `NIT Emisor` para identificar cada proveedor.
 
-La condición `IVA != 0` diferencia estos documentos de los gastos excluidos.
+Documentos donde la empresa es receptora y el documento tiene IVA diferente de cero.
+
+Filtro principal:
+
+- `NIT Receptor == nit`
+- Tipo de documento incluido en `TIPOS_GASTO`
+- `IVA != 0`
+
+Se agrupa por:
+
+- `NIT Emisor`
+- `Nombre Emisor`
 
 ### Gastos Excluidos
-Documentos donde **la empresa es receptora** y el documento tiene IVA igual a cero — son compras de bienes o servicios excluidos de IVA. Incluye también los documentos soporte emitidos por la propia empresa, que representan gastos propios sin IVA.
 
-Para estos documentos la base gravable se reporta en cero.
+Incluye dos casos:
 
-### Nómina
-Documentos de nómina electrónica donde **la empresa es emisora** — registra los pagos realizados a cada empleado. Se consolida por `NIT Receptor` (el empleado) para totalizar lo pagado a cada persona.
+Caso 1: facturas recibidas de terceros sin IVA.
 
-IVA y Base se reportan en cero ya que la nómina no genera estos conceptos.
+- `NIT Receptor == nit`
+- Tipo de documento incluido en `TIPOS_GASTO_EXCLUIDO`
+- `IVA == 0`
 
-> Nota: El archivo exógena incluye el tipo `'Nomima Individual De Ajustes'` con error tipográfico. Este valor se conserva tal como viene en la fuente para garantizar que los filtros funcionen correctamente.
+Caso 2: documento soporte emitido por la empresa.
+
+- `NIT Emisor == nit`
+- Tipo de documento incluido en `TIPOS_DOC_SOPORTE`
+
+Para gastos excluidos, la columna `Base` se reporta en cero.
+
+### Nomina
+
+Documentos de nomina electronica donde la empresa es emisora.
+
+Filtro principal:
+
+- `NIT Emisor == nit`
+- Tipo de documento incluido en `TIPOS_NOMINA`
+
+Se agrupa por:
+
+- `NIT Receptor`
+- `Nombre Receptor`
+
+Para nomina, `Base` e `IVA` se reportan en cero.
 
 ---
 
-## Notas técnicas
+## Calculo De Base Y DV
 
-- El programa normaliza las columnas `NIT Emisor` y `NIT Receptor` a texto antes de procesar, para manejar correctamente NITs extranjeros que contienen letras.
-- El dígito de verificación se calcula automáticamente usando el algoritmo oficial de la DIAN. Para NITs extranjeros la columna `DV` queda vacía.
-- El DataFrame se reduce progresivamente después de cada módulo para evitar reprocesar filas ya consolidadas.
-- El nombre de la hoja del archivo Excel de origen puede variar — el programa siempre lee la primera hoja sin importar su nombre.
+La base gravable de ingresos, notas credito, devoluciones y gastos se calcula actualmente asi:
+
+```text
+Base = IVA / 0.19
+```
+
+Esto asume una tarifa general de IVA del 19%.
+
+El digito de verificacion se calcula automaticamente usando el algoritmo de la DIAN. Si el NIT contiene letras, se considera un NIT extranjero y el campo `DV` queda vacio.
+
+---
+
+## Manejo De Errores En La API
+
+Errores de validacion esperados:
+
+- NIT invalido.
+- Archivo que no puede abrirse como Excel.
+- Columnas obligatorias faltantes.
+- Valores no numericos o vacios en `IVA` o `Total`.
+
+Estos errores se devuelven como HTTP `400`.
+
+Errores inesperados durante el procesamiento se devuelven como HTTP `500`.
+
+---
+
+## Notas Tecnicas
+
+- El procesamiento del archivo se realiza en memoria usando `BytesIO`.
+- La API devuelve el Excel mediante `StreamingResponse`.
+- El archivo de origen puede tener cualquier nombre de hoja; siempre se lee la primera.
+- El DataFrame se reduce progresivamente despues de cada modulo para evitar reprocesar filas ya consolidadas.
+- En `TIPOS_NOMINA` se conserva el valor `Nomima Individual De Ajustes` porque asi aparece en la fuente de datos.
+
+---
+
+## Pendientes Recomendados
+
+- Estandarizar las columnas finales como `NIT`, `DV`, `Nombre`, `Base`, `IVA`, `Total`.
+- Revisar si `Base = IVA / 0.19` es suficiente para todos los casos reales.
+- Agregar logs internos para errores HTTP `500`.
+- Crear pruebas automaticas para validar filtros y salidas por cada modulo.
+- Evaluar si conviene separar lectura, validacion, calculo y escritura en funciones mas pequenas.

@@ -30,4 +30,7 @@ async def consolidar(
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         # Errores inesperados durante el procesamiento del archivo
-        raise HTTPException(status_code=500, detail=f"Error al procesar el archivo {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Ocurrió un error inesperado al procesar el archivo"
+        )
